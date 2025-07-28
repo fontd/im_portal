@@ -1,9 +1,14 @@
 # main.py - Archivo principal de Streamlit
 import streamlit as st
+import os
+from dotenv import load_dotenv
 from utils.config import setup_page_config, load_custom_css
 from utils.sidebar import render_sidebar
 from tools import faq_generator, html_description_generator, product_analyzer, coming_soon
 from utils.footer import render_footer
+
+# Cargar variables de entorno del archivo .env
+load_dotenv()
 
 def main():
     """Función principal de la aplicación"""

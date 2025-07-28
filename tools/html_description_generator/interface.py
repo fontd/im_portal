@@ -12,27 +12,19 @@ from .processor import (
 )
 
 def render(config=None):
-    """Renderiza la interfaz del generador de descripciones HTML"""
+    """Función principal para renderizar la interfaz de generación HTML"""
     
-    # Guardar config en session state
-    if config:
-        st.session_state['sidebar_config'] = config
+    st.title("🧪 Generador de Descripciones HTML para Cosmética")
+    st.markdown("---")
     
-    st.title("🎨 Generador de Descripciones HTML")
-    st.markdown("""
-    ### Sistema Avanzado de Generación de Descripciones HTML
-    
-    **Características:**
-    - 🌐 Búsqueda automática de información del producto en la web
-    - 📝 Procesamiento de URLs específicas proporcionadas manualmente
-    - 🎨 5 estilos de descripción diferentes (Completa, Marketing, Técnica, E-commerce, Comparativa)
-    - 🌍 Soporte multiidioma (Español, Inglés, Catalán)
-    - 📱 HTML responsive con CSS inline incluido
-    - 🛒 Compatible con Shopify metafields
-    """)
-    
-    # Tabs principales
-    tab1, tab2, tab3, tab4 = st.tabs(["📤 Cargar Productos", "⚙️ Configuración", "🚀 Generar Descripciones", "📊 Resultados"])
+    # Crear pestañas
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "📤 Cargar Productos", 
+        "⚙️ Configuración", 
+        "🚀 Generar Descripciones",
+        "🧪 Probar Producto Individual",  # Nueva pestaña
+        "📊 Resultados"
+    ])
     
     with tab1:
         render_upload_tab()
@@ -44,6 +36,9 @@ def render(config=None):
         render_generation_tab()
     
     with tab4:
+        render_test_individual_tab()  # Nueva función
+    
+    with tab5:
         render_results_tab()
 
 def render_upload_tab():
@@ -462,6 +457,182 @@ def render_generation_tab():
                 st.markdown("- API Key incorrecta o sin créditos")
                 st.markdown("- URLs inaccesibles (en modo manual)")
                 st.markdown("- Error de conexión")
+
+def render_test_individual_tab():
+    """Nueva pestaña para probar productos individuales con logs en tiempo real"""
+    
+    st.markdown("### 🧪 Prueba de Producto Individual")
+    st.markdown("Prueba el sistema avanzado de búsqueda con un solo producto y ve el progreso en tiempo real.")
+    
+    # Verificar API Key
+    if 'openai_api_key' not in st.session_state or not st.session_state['openai_api_key']:
+        st.warning("⚠️ Primero debes configurar tu API Key en la pestaña 'Configuración'")
+        return
+    
+    # Formulario de entrada
+    with st.form("test_individual_form"):
+        st.markdown("#### 📝 Información del Producto")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            nombre_producto = st.text_input(
+                "Nombre del Producto *", 
+                placeholder="Ej: L'Oréal Revitalift Vitamin C Serum",
+                help="Nombre completo del producto cosmético"
+            )
+            
+            codigo_barras = st.text_input(
+                "Código de Barras (opcional)", 
+                placeholder="1234567890123",
+                help="Código de barras para búsqueda más precisa"
+            )
+        
+        with col2:
+            metodo = st.selectbox(
+                "Método de Búsqueda",
+                options=["Automática (recomendado)", "URLs específicas"],
+                help="Automática usa búsqueda web inteligente"
+            )
+            
+            idioma = st.selectbox(
+                "Idioma de la descripción",
+                options=["es", "en"],
+                index=0,
+                help="Idioma para generar la descripción HTML"
+            )
+        
+        # URLs específicas (si se selecciona ese método)
+        urls_especificas = []
+        if "específicas" in metodo:
+            st.markdown("#### 🔗 URLs Específicas")
+            for i in range(3):
+                url = st.text_input(f"URL {i+1}", key=f"url_{i}")
+                if url.strip():
+                    urls_especificas.append(url.strip())
+        
+        submitted = st.form_submit_button("🚀 Iniciar Búsqueda Avanzada", type="primary")
+    
+    # Procesar cuando se envía el formulario
+    if submitted:
+        if not nombre_producto.strip():
+            st.error("❌ El nombre del producto es obligatorio")
+            return
+        
+        # Crear contenedores para el progreso
+        st.markdown("### 📊 Progreso en Tiempo Real")
+        
+        # Placeholder para logs
+        log_container = st.empty()
+        
+        try:
+            # Inicializar generador
+            from .generator import SimpleHTMLDescriptionGenerator
+            generator = SimpleHTMLDescriptionGenerator(api_key=st.session_state['openai_api_key'])
+            
+            # Mostrar inicio
+            with log_container.container():
+                st.write("🚀 **Iniciando búsqueda avanzada...**")
+                progress_logs = []
+            
+            # Determinar método
+            metodo_busqueda = "manual" if "específicas" in metodo else "auto"
+            
+            # Ejecutar búsqueda
+            if metodo_busqueda == "auto":
+                product_data = generator.buscar_informacion_web_real(
+                    nombre_producto=nombre_producto,
+                    codigo_barras=codigo_barras
+                )
+            else:
+                product_data = generator.buscar_producto_simple(
+                    nombre_producto=nombre_producto,
+                    codigo_barras=codigo_barras,
+                    urls_especificas=urls_especificas
+                )
+            
+            # Mostrar logs de progreso
+            logs = generator.get_progress_logs()
+            with log_container.container():
+                st.write("#### 📋 Registro de Actividad:")
+                for log in logs:
+                    status_emoji = {
+                        "info": "ℹ️", "success": "✅", "warning": "⚠️",
+                        "error": "❌", "search": "🔍", "processing": "⚙️", "ai": "🤖"
+                    }
+                    emoji = status_emoji.get(log["status"], "📝")
+                    st.write(f"{emoji} **[{log['timestamp']}]** {log['message']}")
+            
+            # Generar HTML
+            st.write("🎨 **Generando HTML con máxima calidad...**")
+            html_description = generator.generar_html_limpio(product_data, idioma)
+            
+            # Validar HTML
+            es_valido, errores = generator.validar_html_formato(html_description)
+            
+            # Mostrar resultados
+            st.markdown("### ✅ Resultado")
+            
+            if es_valido:
+                st.success("✅ Descripción HTML generada correctamente")
+            else:
+                st.warning(f"⚠️ HTML con advertencias: {', '.join(errores)}")
+            
+            # Estadísticas
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("🌐 Fuentes", product_data.fuentes_encontradas, help="Fuentes web consultadas")
+            with col2:
+                st.metric("🧪 Ingredientes", len(product_data.ingredientes_activos), help="Ingredientes activos identificados")
+            with col3:
+                st.metric("📝 Beneficios", len(product_data.beneficios), help="Beneficios encontrados")
+            with col4:
+                st.metric("📏 Longitud HTML", len(html_description), help="Caracteres en el HTML generado")
+            
+            # Mostrar HTML generado
+            st.markdown("### 📄 HTML Generado")
+            
+            # Crear pestañas para ver el resultado
+            tab_preview, tab_html, tab_copy = st.tabs(["👁️ Vista Previa", "📝 Código HTML", "📋 Copiar"])
+            
+            with tab_preview:
+                st.markdown("#### Vista previa del HTML:")
+                st.markdown(html_description, unsafe_allow_html=True)
+            
+            with tab_html:
+                st.markdown("#### Código HTML:")
+                st.code(html_description, language='html')
+            
+            with tab_copy:
+                st.markdown("#### Copiar al portapapeles:")
+                st.text_area("HTML para copiar:", html_description, height=300)
+                
+                # Botón para copiar
+                escaped_html = html_description.replace('`', '\\`')
+                copy_button_html = f"""
+                <button onclick="navigator.clipboard.writeText(`{escaped_html}`).then(() => alert('¡HTML copiado al portapapeles!'))">
+                    📋 Copiar HTML
+                </button>
+                """
+                st.markdown(copy_button_html, unsafe_allow_html=True)
+            
+        except Exception as e:
+            st.error(f"❌ Error al generar la descripción: {str(e)}")
+            
+            # Mostrar logs de depuración si están disponibles
+            try:
+                if 'generator' in locals():
+                    logs = generator.get_progress_logs()
+                    if logs:
+                        with st.expander("🔍 Ver logs de depuración"):
+                            for log in logs:
+                                st.write(f"**[{log['timestamp']}]** {log['message']}")
+            except:
+                pass
+            
+            with st.expander("🐛 Detalles técnicos del error"):
+                st.code(str(e))
+
 
 def render_results_tab():
     """Tab de resultados y descargas"""

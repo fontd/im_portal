@@ -23,12 +23,19 @@ def render_sidebar():
         st.markdown("---")
         st.markdown("### ⚙️ Configuración")
         
+        # Verificar si la API key se carga desde .env
+        env_api_key = os.getenv('OPENAI_API_KEY', '')
+        
+        # Debug info (solo mostrar si hay problemas)
+        if not env_api_key:
+            st.warning("⚠️ OPENAI_API_KEY no encontrada en variables de entorno")
+        
         # Configuración de API Key
         api_key = st.text_input(
             "OpenAI API Key:",
-            value=os.getenv('OPENAI_API_KEY', ''),
+            value=env_api_key,
             type="password",
-            help="Tu clave de API de OpenAI"
+            help="Tu clave de API de OpenAI (cargada automáticamente desde .env)"
         )
         
         # Selector de modelo GPT

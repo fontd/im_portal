@@ -1,5 +1,5 @@
 # tools/coming_soon/interface.py
-import streamlit as st
+import streamlit as st # type: ignore
 
 def render(config):
     """Interfaz para herramientas futuras"""
