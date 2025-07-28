@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  shopify-automation:
+    build: .
+    container_name: shopify-automation-platform
+    ports:
+      - "8501:8501"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
