@@ -2,7 +2,7 @@
 import streamlit as st
 from utils.config import setup_page_config, load_custom_css
 from utils.sidebar import render_sidebar
-from tools import faq_generator, product_analyzer, coming_soon
+from tools import faq_generator, html_description_generator, product_analyzer, coming_soon
 from utils.footer import render_footer
 
 def main():
@@ -36,6 +36,8 @@ def route_to_tool(config):
     
     if herramienta == "🤖 Generador de FAQs":
         faq_generator.render(config)
+    elif herramienta == "🎨 Generador de Descripciones HTML":
+        html_description_generator.render(config)
     elif herramienta == "📊 Análisis de Productos":
         product_analyzer.render(config)
     else:

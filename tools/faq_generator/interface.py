@@ -1,5 +1,5 @@
 # tools/faq_generator/interface.py
-import streamlit as st
+import streamlit as st # type: ignore
 import pandas as pd
 import os
 from datetime import datetime

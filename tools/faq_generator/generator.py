@@ -1,6 +1,6 @@
 # tools/faq_generator/generator.py
 import pandas as pd
-from openai import OpenAI
+from openai import OpenAI # type: ignore
 from typing import Dict, List, Tuple, Optional, Set
 import json
 import time
@@ -9,7 +9,7 @@ import re
 import random
 import hashlib
 from collections import defaultdict
-import numpy as np
+import numpy as np # type: ignore
 from dataclasses import dataclass, field
 import pickle
 import os
@@ -729,9 +729,9 @@ class PremiumCosmeticsFAQGenerator:
             # Preparar resultado final con toda la metadata
             resultado_final = self._preparar_resultado_final(producto, mejor_resultado, historial_completo)
             return resultado_final
-        
-        return None
-    
+        else:
+            return None
+
     def _expandir_respuesta(self, respuesta: str, pregunta_data: Dict, perfil: ProductProfile) -> str:
         """Expande respuestas que son muy cortas"""
         expansion_prompts = [

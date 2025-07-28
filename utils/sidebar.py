@@ -11,7 +11,12 @@ def render_sidebar():
         st.markdown("**Selecciona una herramienta:**")
         herramienta_seleccionada = st.radio(
             "herramientas",
-            ["🤖 Generador de FAQs", "📊 Análisis de Productos", "🔮 Próximamente..."],
+            [
+                "🤖 Generador de FAQs", 
+                "🎨 Generador de Descripciones HTML",
+                "📊 Análisis de Productos", 
+                "🔮 Próximamente..."
+            ],
             label_visibility="collapsed"
         )
         
