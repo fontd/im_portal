@@ -14,7 +14,8 @@ def render_sidebar():
             [
                 "🤖 Generador de FAQs", 
                 "🎨 Generador de Descripciones HTML",
-                "📊 Análisis de Productos", 
+                "� Generador ULTRA Multi-Experto",
+                "�📊 Análisis de Productos", 
                 "🔮 Próximamente..."
             ],
             label_visibility="collapsed"

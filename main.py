@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from utils.config import setup_page_config, load_custom_css
 from utils.sidebar import render_sidebar
-from tools import faq_generator, html_description_generator, product_analyzer, coming_soon
+from tools import faq_generator, html_description_generator, html_description_generator_ultra, product_analyzer, coming_soon
 from utils.footer import render_footer
 
 # Cargar variables de entorno del archivo .env
@@ -43,7 +43,9 @@ def route_to_tool(config):
         faq_generator.render(config)
     elif herramienta == "🎨 Generador de Descripciones HTML":
         html_description_generator.render(config)
-    elif herramienta == "📊 Análisis de Productos":
+    elif herramienta == "� Generador ULTRA Multi-Experto":
+        html_description_generator_ultra.render(config)
+    elif herramienta == "�📊 Análisis de Productos":
         product_analyzer.render(config)
     else:
         coming_soon.render(config)

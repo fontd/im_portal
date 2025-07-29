@@ -1,6 +1,6 @@
 # tools/faq_generator/processor.py
 import pandas as pd
-import streamlit as st
+import streamlit as st # type: ignore
 from typing import Dict, List, Optional
 import json
 from datetime import datetime
